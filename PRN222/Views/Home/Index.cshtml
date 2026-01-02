@@ -1,0 +1,290 @@
+﻿@model IEnumerable<PRN222.Models.Book>
+@{
+    ViewData["Title"] = "Home Page";
+    var categories = ViewBag.Categories as List<PRN222.Models.Category>;
+    var newestBooks = ViewBag.NewestBooks as List<PRN222.Models.Book>;
+    var author = ViewBag.Author as List<PRN222.Models.Author>;
+}
+
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Ogani Template">
+    <meta name="keywords" content="Ogani, unica, creative, html">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Ogani | Template</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;900&display=swap" rel="stylesheet">
+
+    <!-- Css Styles -->
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
+    <link rel="stylesheet" href="css/elegant-icons.css" type="text/css">
+    <link rel="stylesheet" href="css/nice-select.css" type="text/css">
+    <link rel="stylesheet" href="css/jquery-ui.min.css" type="text/css">
+    <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
+    <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
+    <link rel="stylesheet" href="css/style.css" type="text/css">
+
+    <style>
+        .pagination {
+            display: flex;
+            justify-content: center;
+            padding: 0;
+            list-style: none;
+        }
+
+            .pagination a {
+                color: black;
+                float: left;
+                padding: 8px 16px;
+                text-decoration: none;
+                transition: background-color .3s;
+                border: 1px solid #ddd;
+                margin: 0 4px;
+            }
+
+                .pagination a.active {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: 1px solid #4CAF50;
+                }
+
+                .pagination a:hover:not(.active) {
+                    background-color: #ddd;
+                }
+    </style>
+</head>
+
+<body>
+  
+    <section class="hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>All departments</span>
+                        </div>
+                        @if (Context.Session.GetInt32("RoleId") == 2) // Giả sử RoleId của "employee" là 1
+                        {
+                            <ul>
+                                <li><a href="@Url.Action("Index", "Home")"><strong>Home</strong></a></li>
+                                <li><a href="@Url.Action("CreateCard", "Card")">Làm Thẻ</a></li>
+                                <li><a href="@Url.Action("checkCard", "Card")">Tạo Phiếu Mượn</a></li>
+                                <li><a href="@Url.Action("ManageBorrow", "Borrow")">Quản Lý Phiếu Mượn</a></li>
+                                <li><a href="@Url.Action("Logout", "User")">Đăng xuất</a></li>
+                            </ul>
+                        }
+                        else
+                        {
+                            <ul>
+                                <li><a href="@Url.Action("Index", "Home")"><strong>All</strong></a></li>
+                                @foreach (var category in categories)
+                                {
+                                    <li><a href="@Url.Action("Index", "Home", new { categoryId = category.CategoryId })">@category.CategoryName</a></li>
+                                }
+                            </ul>
+                        }
+
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <div class="hero__search">
+                        <div class="hero__search__form">
+                            <form action="@Url.Action("Index", "Home")" method="get">
+                                <input type="text" name="query" placeholder="What do you need?" value="@ViewBag.Query">
+                                <button type="submit" class="site-btn">SEARCH</button>
+                            </form>
+                        </div>
+
+                        <div class="hero__search__phone">
+                            <div class="hero__search__phone__icon">
+                                <i class="fa fa-phone"></i>
+                            </div>
+                            <div class="hero__search__phone__text">
+                                <h5>+65 11.188.888</h5>
+                                <span>support 24/7 time</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero__item set-bg" data-setbg="img/hero/banner.jpg">
+                        <div class="hero__text">
+                            <span>FRUIT FRESH</span>
+                            <h2>Thư Viên <br />ThuVienF88.com</h2>
+                            <p>Thư Viện Nhiều Sách</p>
+                            <a href="#" class="primary-btn">SHOP NOW</a>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(TempData["SuccessMessage"] as string))
+                    {
+                        <p id="errorMessage" style="color: red;">@Html.Raw(TempData["ErrorMessage"])</p>
+                        <script>
+                            setTimeout(function () {
+                                document.getElementById("errorMessage").style.display = "none";
+                            }, 5000); // Biến mất sau 5 giây
+                        </script>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Featured Section Begin -->
+<section class="featured spad">
+    <div class="container"> 
+        <div class="row featured__filter">
+                <div class="section-title from-blog__title">
+                    <h2>Các Loại Sách</h2>
+                </div>
+            @if (Model.Any())
+            {
+                    @foreach (var book in Model)
+                    {
+                        if (!string.IsNullOrEmpty(book.Images))
+                        {
+                            <div class="col-lg-3 col-md-4 col-sm-6 mix @book.Category.CategoryName.ToLower()">
+                                <div class="featured__item">
+                                    <div class="featured__item__pic">
+                                        <img src="@Url.Content("~/img/Book/" + book.Images)" alt="@book.BookName" style="width: 100%; height: auto; border-radius: 10px;">
+                                        <ul class="featured__item__pic__hover">
+                                            <li><a href="@Url.Action("Index", "BookDetail", new { id = book.BookId})"><i class="fa fa-retweet"></i></a></li>
+                                            <li><a href="@Url.Action("Borrow", "BookDetail", new { bookID = book.BookId })"><i class="fa fa-shopping-cart"></i></a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="featured__item__text">
+                                        <h6><a href="#">@book.BookName</a></h6> <!-- Tên sách -->
+                                        <p>by @book.Author.AuthorName</p> <!-- Tên tác giả -->
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+
+
+
+            }
+            else
+            {
+                <div class="col-12">
+                    
+                        <div class="section-title">
+                            <h2>Không có sách trong danh mục này</h2>
+                        </div>
+                </div>
+            }
+                <!-- Thêm phân trang -->
+                <div class="clearfix">
+                    <ul class="pagination">
+                        
+                            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                            {
+                                <li class="@(i == ViewBag.CurrentPage ? "active" : "")">
+                                    <a href="@Url.Action("Index", "Home", new { page = i, categoryId = ViewBag.CategoryId, query = ViewBag.Query })">@i</a>
+                                </li>
+                            }
+                        
+                    </ul>
+                </div>
+
+        </div>
+    </div>
+</section>
+
+    <!-- Featured Section End -->
+    <!-- Banner Begin -->
+    <!-- Blog Section Begin -->
+    <section class="from-blog spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title from-blog__title">
+                        <h2>Sách Mới Nhất</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var book in newestBooks)
+                {
+                    if (!string.IsNullOrEmpty(book.Images))
+                    {
+                        <div class="col-lg-3 col-md-4 col-sm-6 mix @book.Category.CategoryName.ToLower()">
+                            <div class="featured__item">
+                                <div class="featured__item__pic">
+                                    <img src="@Url.Content("~/img/Book/" + book.Images)" alt="@book.BookName" style="width: 100%; height: auto; border-radius: 10px;">
+                                    <ul class="featured__item__pic__hover">
+                                        <li><a href="@Url.Action("Index", "BookDetail", new { id = book.BookId})"><i class="fa fa-retweet"></i></a></li>
+                                        <li><a href="@Url.Action("Borrow", "BookDetail", new { bookID = book.BookId })"><i class="fa fa-shopping-cart"></i></a></li>
+                                    </ul>
+                                </div>
+                                <div class="featured__item__text">
+                                    <h6><a href="#">@book.BookName</a></h6> <!-- Tên sách -->
+                                    <p>by @book.Author.AuthorName</p> <!-- Tên tác giả -->
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+
+    <!--display 4 tac gia-->
+    <section class="from-blog spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-title from-blog__title">
+                        <h2>Tác Giả Nổi Bật</h2> <!-- Tiêu đề hiển thị -->
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var au in author)
+                {
+                    if (!string.IsNullOrEmpty(au.Image))
+                    {
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="featured__item">
+                                <div class="featured__item__pic">
+                                    <img src="@Url.Content("~/img/Author/" + au.Image)" alt="@au.AuthorName" style="width: 100%; height: auto; border-radius: 10px;">
+                                    <ul class="featured__item__pic__hover">
+                                        <li><a href="@Url.Action("AuthorDetail", "Author", new { id = @au.AuthorId})"><i class="fa fa-retweet"></i></a></li>
+                                    </ul>
+                                </div>
+                            <div class="featured__item__text">
+                                <h6><a href="#">@au.AuthorName</a></h6> 
+                                <p>Hometown: @au.Hometown</p> 
+                            </div>
+                        </div>
+                    </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+
+    
+    <!-- Js Plugins -->
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.nice-select.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/jquery.slicknav.js"></script>
+    <script src="js/mixitup.min.js"></script>
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/main.js"></script>
+
+
+
+</body>
+
+</html>

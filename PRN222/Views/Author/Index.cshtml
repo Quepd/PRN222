@@ -1,0 +1,133 @@
+﻿@model IEnumerable<PRN222.Models.Author>
+
+
+@{
+    ViewData["Title"] = "Quản Lý Tác Giả";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/elegant-icons.css" rel="stylesheet" />
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/css/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/css/nice-select.css" rel="stylesheet" />
+    <link href="~/css/owl.carousel.min.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/css/slicknav.min.css" rel="stylesheet" />
+    <link href="~/css/style.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <style>
+        .settings-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+            .settings-container h3 {
+                margin-bottom: 30px;
+            }
+
+        .btn-settings {
+            width: 250px;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section Begin -->
+    <section class="hero">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-3">
+                    <div class="hero__categories">
+                        <div class="hero__categories__all">
+                            <i class="fa fa-bars"></i>
+                            <span>Quản lý</span>
+                        </div>
+                        <ul>
+                            <li><a href="@Url.Action("GetAllUser", "Admin")">Quản Lý Người Dùng</a></li>
+                            <li><a href="@Url.Action("ManageBooks", "Admin")">Quản Lý Sách</a></li>
+                            <li><a href="@Url.Action("ManageBorrows", "Admin")">Quản Lý Phiếu Mượn</a></li>
+                            <li><a href="@Url.Action("Statistics", "Admin")">Thống Kê</a></li>
+                            <li><a href="@Url.Action("OtherSettings", "Admin")">Khác</a></li>
+                            <li><a href="@Url.Action("Logout", "Login")">Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-9">
+                    <h2>Danh Sách Tác Giả</h2>
+                    <a href="@Url.Action("Create", "Author")" class="btn btn-primary">Thêm Tác Giả</a>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên</th>
+                                <th>Quê Quán</th>
+                                <th>Ngày Sinh</th>
+                                <th>Ngày Mất</th>
+                                <th>Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var author in Model)
+                            {
+                                <tr>
+                                    <td>@author.AuthorId</td>
+                                    <td>@author.AuthorName</td>
+                                    <td>@author.Hometown</td>
+                                    <td>@author.DateOfBirth?.ToString("dd/MM/yyyy")</td>
+                                    <td>@author.DateOfDeath?.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <a href="@Url.Action("Detail", "Author", new { id = author.AuthorId })" class="btn btn-info">Chi Tiết</a>
+
+                                        <a href="@Url.Action("Edit", "Author", new { id = author.AuthorId })" class="btn btn-warning">Sửa</a>
+                                        <button class="btn btn-danger" onclick="deleteAuthor(@author.AuthorId)">Xóa</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function deleteAuthor(authorId) {
+            if (confirm("Bạn có chắc muốn xóa tác giả này?")) {
+                $.ajax({
+                    url: '/Author/Delete/' + authorId,
+                    type: 'POST',
+                    success: function () {
+                        alert("Xóa thành công!");
+                        location.reload(); // Load lại trang sau khi xóa
+                    },
+                    error: function () {
+                        alert("Có lỗi xảy ra, vui lòng thử lại!");
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
